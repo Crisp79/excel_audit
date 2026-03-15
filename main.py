@@ -1,58 +1,82 @@
 import pandas as pd
+from pandas.tseries.frequencies import key
 
+from color import format_audit_excel as fae
 from edit import clean_transaction_data as ctd
 
+filepath1 = "./sheets/CARE.xlsx"
+head_row1 = 12
+key_1 = "Vch No."
+
+filepath2 = "./sheets/jiva.xlsx"
+head_row2 = 24
+key_2 = "Document Number"
+
 clean_df_a = ctd(
-    file_path="./sheets/CARE.xlsx", header_row_index=11, anchor_column="Vch No."
+    file_path=filepath1, header_row_index=head_row1 - 1, anchor_column=key_1
 )
-
-# File B: 23 rows of top metadata. The anchor is 'Document Number'.
-# This instantly removes 'Period Total', 'Cumulative Total', and fragmented 'Accounted' rows.
 clean_df_b = ctd(
-    file_path="./sheets/jiva.xlsx",
-    header_row_index=23,
-    anchor_column="Document Number",
+    file_path=filepath2, header_row_index=head_row2 - 1, anchor_column=key_2
 )
 
-
-# Mapping for your internal ledger
-company_mapping = {
-    "Vch No.": "Invoice_Number",
-    "Date": "Transaction_Date",
-    "Particulars": "Description",
-}
-
-# Mapping for the supplier statement
-supplier_mapping = {
-    "Document Number": "Invoice_Number",
-    "Document Date": "Transaction_Date",
-    # 'Description' is already named correctly in the supplier file,
-    # but we map it anyway just to be safe if it changes.
-    "Description": "Description",
-}
-# Rename columns in the company dataframe
-clean_df_a = clean_df_a.rename(columns=company_mapping)
-
-# Rename columns in the supplier dataframe
-clean_df_b = clean_df_b.rename(columns=supplier_mapping)
-# This converts all column names to uppercase and replaces spaces with underscores
-# Example: "Invoice Number " becomes "INVOICE_NUMBER"
+key_common = "DOCUMENT_NUMBER"
+key_1 = key_1.strip().upper().replace(" ", "_")
+key_2 = key_2.strip().upper().replace(" ", "_")
 
 clean_df_a.columns = clean_df_a.columns.str.strip().str.upper().str.replace(" ", "_")
 clean_df_b.columns = clean_df_b.columns.str.strip().str.upper().str.replace(" ", "_")
 
-clean_df_b["INVOICE_NUMBER"] = clean_df_b["INVOICE_NUMBER"].astype(str)
-clean_df_a["INVOICE_NUMBER"] = clean_df_a["INVOICE_NUMBER"].astype(str)
+clean_df_a[key_common] = clean_df_a[key_1]
+clean_df_b[key_common] = clean_df_b[key_2]
+
+clean_df_a["DOC"] = "doc1"
+clean_df_b["DOC"] = "doc2"
+
+clean_df_a[key_common] = clean_df_a[key_common].astype(str)
+clean_df_b[key_common] = clean_df_b[key_common].astype(str)
+
+clean_df_a["DEBIT"] = clean_df_a["DEBIT"].fillna(0)
+clean_df_a["CREDIT"] = clean_df_a["CREDIT"].fillna(0)
 
 print(clean_df_a.info())
 print(clean_df_b.info())
 
 
-merged_df_inner = clean_df_a.merge(clean_df_b, on="INVOICE_NUMBER", how="inner")
-merged_df_outer = clean_df_b.merge(clean_df_b, on="INVOICE_NUMBER", how="outer")
+merged_df = pd.merge(
+    clean_df_a,
+    clean_df_b,
+    on=key_common,
+    how="outer",
+    suffixes=("_A", "_B"),
+    indicator=True,
+)
+print(merged_df.info())
 
-print(merged_df_inner.info())
-print(merged_df_outer.info())
+merged_df_left = merged_df[merged_df["_merge"] == "left_only"]
+merged_df_right = merged_df[merged_df["_merge"] == "right_only"]
+merged_df_inner = merged_df[merged_df["_merge"] == "both"]
+
+final_df_a = merged_df[merged_df["DOC_A"] == "doc1"]
+final_df_b = merged_df[merged_df["DOC_B"] == "doc2"]
+
+merged_df_inner["VARIATION"] = (
+    merged_df_inner["DEBIT_A"]
+    + merged_df_inner["DEBIT_B"]
+    - merged_df_inner["CREDIT_A"]
+    - merged_df_inner["CREDIT_B"]
+)
 
 merged_df_inner.to_excel("output/output_inner.xlsx")
-merged_df_outer.to_excel("output/output_outer.xlsx")
+merged_df_left.to_excel("output/output_left.xlsx")
+merged_df_right.to_excel("output/output_right.xlsx")
+merged_df.to_excel("output/output_outer.xlsx")
+final_df_a.to_excel("output/output_a.xlsx")
+final_df_b.to_excel("output/output_b.xlsx")
+
+# Run the formatting function
+fae("output/output_outer.xlsx")
+fae("output/output_inner.xlsx")
+fae("output/output_left.xlsx")
+fae("output/output_right.xlsx")
+fae("output/output_a.xlsx")
+fae("output/output_b.xlsx")
