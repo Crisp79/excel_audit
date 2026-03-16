@@ -21,9 +21,6 @@ clean_df_b = ctd(
 key_1 = key_1.strip().upper().replace(" ", "_")
 key_2 = key_2.strip().upper().replace(" ", "_")
 
-clean_df_a.columns = clean_df_a.columns.str.strip().str.upper().str.replace(" ", "_")
-clean_df_b.columns = clean_df_b.columns.str.strip().str.upper().str.replace(" ", "_")
-
 clean_df_a[key_1] = clean_df_a[key_1].astype(str)
 clean_df_b[key_2] = clean_df_b[key_2].astype(str)
 
