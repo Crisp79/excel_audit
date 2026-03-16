@@ -66,8 +66,8 @@ merged_df["VARIATION"] = (
     - merged_df["CREDIT_B"]
 )
 
-final_df_a = merged_df[merged_df["DOC_A"] == "doc1"]
-final_df_b = merged_df[merged_df["DOC_B"] == "doc2"]
+final_df_a = merged_df[merged_df["_merge"].isin(["left_only","both"])]
+final_df_b = merged_df[merged_df["_merge"].isin(["right_only","both"])]
 
 final_df_a = final_df_a.drop(
     columns=[col for col in final_df_a.columns if col.endswith("_B")]
