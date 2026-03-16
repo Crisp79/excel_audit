@@ -1,15 +1,20 @@
+import json
+
 import pandas as pd
 
 from color import format_audit_excel as fae
 from edit import clean_transaction_data as ctd
 
-filepath1 = "./sheets/CARE.xlsx"
-head_row1 = 12
-key_1 = "Vch No."
+with open("input.json", "r") as file:
+    input = json.load(file)
 
-filepath2 = "./sheets/jiva.xlsx"
-head_row2 = 24
-key_2 = "Document Number"
+filepath1 = input["file_1"]["path"]
+head_row1 = input["file_1"]["head_row"]
+key_1 = input["file_1"]["key"]
+
+filepath2 = input["file_2"]["path"]
+head_row2 = input["file_2"]["head_row"]
+key_2 = input["file_2"]["key"]
 
 clean_df_a = ctd(
     file_path=filepath1, header_row_index=head_row1 - 1, anchor_column=key_1
