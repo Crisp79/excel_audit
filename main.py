@@ -1,5 +1,4 @@
 import pandas as pd
-from pandas.tseries.frequencies import key
 
 from color import format_audit_excel as fae
 from edit import clean_transaction_data as ctd
@@ -24,9 +23,6 @@ key_2 = key_2.strip().upper().replace(" ", "_")
 
 clean_df_a.columns = clean_df_a.columns.str.strip().str.upper().str.replace(" ", "_")
 clean_df_b.columns = clean_df_b.columns.str.strip().str.upper().str.replace(" ", "_")
-
-clean_df_a["DOC"] = "doc1"
-clean_df_b["DOC"] = "doc2"
 
 clean_df_a[key_1] = clean_df_a[key_1].astype(str)
 clean_df_b[key_2] = clean_df_b[key_2].astype(str)
@@ -55,10 +51,6 @@ merged_df = pd.merge(
 )
 print(merged_df.info())
 
-merged_df_left = merged_df[merged_df["_merge"] == "left_only"]
-merged_df_right = merged_df[merged_df["_merge"] == "right_only"]
-merged_df_inner = merged_df[merged_df["_merge"] == "both"]
-
 merged_df["VARIATION"] = (
     merged_df["DEBIT_A"]
     + merged_df["DEBIT_B"]
@@ -66,8 +58,8 @@ merged_df["VARIATION"] = (
     - merged_df["CREDIT_B"]
 )
 
-final_df_a = merged_df[merged_df["_merge"].isin(["left_only","both"])]
-final_df_b = merged_df[merged_df["_merge"].isin(["right_only","both"])]
+final_df_a = merged_df[merged_df["_merge"].isin(["left_only", "both"])]
+final_df_b = merged_df[merged_df["_merge"].isin(["right_only", "both"])]
 
 final_df_a = final_df_a.drop(
     columns=[col for col in final_df_a.columns if col.endswith("_B")]
@@ -76,17 +68,11 @@ final_df_b = final_df_b.drop(
     columns=[col for col in final_df_b.columns if col.endswith("_A")]
 )
 
-merged_df_inner.to_excel("output/output_inner.xlsx")
-merged_df_left.to_excel("output/output_left.xlsx")
-merged_df_right.to_excel("output/output_right.xlsx")
 merged_df.to_excel("output/output_outer.xlsx")
 final_df_a.to_excel("output/output_a.xlsx")
 final_df_b.to_excel("output/output_b.xlsx")
 
 # Run the formatting function
 fae("output/output_outer.xlsx")
-fae("output/output_inner.xlsx")
-fae("output/output_left.xlsx")
-fae("output/output_right.xlsx")
 fae("output/output_a.xlsx")
 fae("output/output_b.xlsx")
