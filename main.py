@@ -59,15 +59,15 @@ merged_df_left = merged_df[merged_df["_merge"] == "left_only"]
 merged_df_right = merged_df[merged_df["_merge"] == "right_only"]
 merged_df_inner = merged_df[merged_df["_merge"] == "both"]
 
+merged_df["VARIATION"] = (
+    merged_df["DEBIT_A"]
+    + merged_df["DEBIT_B"]
+    - merged_df["CREDIT_A"]
+    - merged_df["CREDIT_B"]
+)
+
 final_df_a = merged_df[merged_df["DOC_A"] == "doc1"]
 final_df_b = merged_df[merged_df["DOC_B"] == "doc2"]
-
-merged_df_inner["VARIATION"] = (
-    merged_df_inner["DEBIT_A"]
-    + merged_df_inner["DEBIT_B"]
-    - merged_df_inner["CREDIT_A"]
-    - merged_df_inner["CREDIT_B"]
-)
 
 merged_df_inner.to_excel("output/output_inner.xlsx")
 merged_df_left.to_excel("output/output_left.xlsx")
