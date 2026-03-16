@@ -1,7 +1,6 @@
 sheets/
 __pycache__/
-.python-version
-*.toml
 output/
 *.xlsx
 *.xlsx#
+.venv
