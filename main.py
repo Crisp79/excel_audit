@@ -69,6 +69,13 @@ merged_df["VARIATION"] = (
 final_df_a = merged_df[merged_df["DOC_A"] == "doc1"]
 final_df_b = merged_df[merged_df["DOC_B"] == "doc2"]
 
+final_df_a = final_df_a.drop(
+    columns=[col for col in final_df_a.columns if col.endswith("_B")]
+)
+final_df_b = final_df_b.drop(
+    columns=[col for col in final_df_b.columns if col.endswith("_A")]
+)
+
 merged_df_inner.to_excel("output/output_inner.xlsx")
 merged_df_left.to_excel("output/output_left.xlsx")
 merged_df_right.to_excel("output/output_right.xlsx")
