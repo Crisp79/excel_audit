@@ -1,88 +1,58 @@
 import openpyxl
-from openpyxl import Workbook
 from openpyxl.styles import PatternFill
-from openpyxl.utils.dataframe import dataframe_to_rows
 
 
-def format_and_split_dataframe(df, output_filename):
-    # 1. Initialize a new workbook
-    wb = Workbook()
-    # Remove the default sheet
-    del wb["Sheet"]
+def format_and_split_dataframe(file_path, df,output_f):
+    wb = openpyxl.load_workbook(file_path)
 
-    # 2. Define the colors
     green = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
     yellow = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
     red = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
 
-    # 3. Get column indices from DataFrame (0-based)
-    # We use .get_loc to find positions safely
-    try:
-        m_idx = df.columns.get_loc("_merge")
-        v_idx = df.columns.get_loc("VARIATION")
-        # Handle flexible names for debit/credit
-        d_a_idx = next(
-            (i for i, col in enumerate(df.columns) if col in ["DEBIT_a", "DEBIT"]), None
-        )
-        c_b_idx = next(
-            (i for i, col in enumerate(df.columns) if col in ["CREDIT_b", "CREDIT"]),
-            None,
-        )
-        sheet_col_idx = df.columns.get_loc("SHEET")
-    except KeyError as e:
-        print(f"Error: Missing required column {e}")
-        return
-
-    # 4. Group data by the 'SHEET' column
+    # Group by sheet so we only determine the 'Variation' column once per sheet
     for sheet_name, group in df.groupby("SHEET"):
-        # Clean sheet name for Excel
-        clean_name = "".join(c for c in str(sheet_name) if c not in r"\*?:/[]")[:31]
-        ws = wb.create_sheet(title=clean_name)
+        if sheet_name not in wb.sheetnames:
+            continue
 
-        # 5. Write DataFrame to the sheet
-        # index=False, header=True
-        for r_idx, row_data in enumerate(
-            dataframe_to_rows(group, index=False, header=True), 1
-        ):
-            ws.append(row_data)
+        ws = wb[sheet_name]
 
-            # Skip the header row (index 1) for coloring logic
-            if r_idx == 1:
-                continue
+        # Determine the Variation column index ONCE per sheet
+        # We check if a 'VARIATION' header already exists; if not, use max_column + 1
+        var_col_idx = None
+        for cell in ws[1]:  # Look at the header row
+            if cell.value == "VARIATION":
+                var_col_idx = cell.column
+                break
 
-            # 6. Apply your Audit Logic
-            # Note: dataframe_to_rows yields row data as a list/tuple
-            # row_data corresponds to the values in the current row
-            m_val = row_data[m_idx] if m_idx is not None else None
-            variation = row_data[v_idx] if v_idx is not None else 0
-            debit_a = row_data[d_a_idx] if d_a_idx is not None else 0
-            credit_b = row_data[c_b_idx] if c_b_idx is not None else 0
+        if var_col_idx is None:
+            var_col_idx = ws.max_column + 1
+            ws.cell(row=1, column=var_col_idx).value = "VARIATION"
+
+        # Now iterate through the rows for this specific sheet
+        for _, data in group.iterrows():
+            row_idx = int(data["ROW_NUM"])
+
+            # 1. Write the variation value in the fixed column
+            ws.cell(row=row_idx, column=var_col_idx).value = data["VARIATION"]
+
+            # 2. Apply Audit Coloring Logic
+            m_val = data["_merge"]
+            variation = data["VARIATION"]
+            debit_a = data.get("DEBIT_A", data.get("DEBIT", 0))
+            credit_b = data.get("CREDIT_B", data.get("CREDIT", 0))
 
             row_fill = None
             if m_val == "both":
                 row_fill = green if variation == 0 else yellow
-            elif m_val == "left_only" and debit_a and debit_a != 0:
+            elif m_val == "left_only" and debit_a != 0:
                 row_fill = red
-            elif m_val == "right_only" and credit_b and credit_b != 0:
+            elif m_val == "right_only" and credit_b != 0:
                 row_fill = red
 
+            # 3. Apply the fill to the entire row
             if row_fill:
-                for cell in ws[ws.max_row]:  # Apply to the row just appended
+                for cell in ws[row_idx]:
                     cell.fill = row_fill
 
-        # 7. Final Cleanup for this sheet
-        # Delete columns in reverse order to maintain index integrity
-        cols_to_delete = sorted(
-            [i + 1 for i in [m_idx, sheet_col_idx] if i is not None], reverse=True
-        )
-        for col_idx in cols_to_delete:
-            ws.delete_cols(col_idx)
-
-        ws.freeze_panes = "A2"
-
-    wb.save(output_filename)
-    print(f"DataFrame successfully split and saved to {output_filename}")
-
-
-# Usage:
-# format_and_split_dataframe(your_dataframe, "Final_Audit.xlsx")
+    wb.save(output_f)
+    print(f"Original file {output_f} updated successfully.")

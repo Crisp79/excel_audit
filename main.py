@@ -24,9 +24,6 @@ clean_df_b = ctd(
     file_path=filepath2, header_row_index=head_row2 - 1, anchor_column=key_2
 )
 
-clean_df_a["SERIAL"] = np.arange(1, len(clean_df_a) + 1)
-clean_df_b["SERIAL"] = np.arange(1, len(clean_df_b) + 1)
-
 key_1 = key_1.strip().upper().replace(" ", "_")
 key_2 = key_2.strip().upper().replace(" ", "_")
 
@@ -78,14 +75,12 @@ final_df_b = final_df_b.drop(
 final_df_a.columns = final_df_a.columns.str.removesuffix("_A")
 final_df_b.columns = final_df_b.columns.str.removesuffix("_B")
 
-final_df_a = final_df_a.sort_values(by="SERIAL")
-final_df_b = final_df_b.sort_values(by="SERIAL")
+final_df_a = final_df_a.sort_values(by="ROW_NUM")
+final_df_b = final_df_b.sort_values(by="ROW_NUM")
 
-final_df_a = final_df_a.drop(columns="SERIAL")
-final_df_b = final_df_b.drop(columns="SERIAL")
 
-fsd(final_df_a, "output/output_a1.xlsx")
-fsd(final_df_b, "output/output_b1.xlsx")
+fsd(filepath1,final_df_a, "output/output_a1.xlsx")
+fsd(filepath2,final_df_b, "output/output_b1.xlsx")
 
 merged_df.to_excel("output/output_outer.xlsx")
 final_df_a.to_excel("output/output_a.xlsx")
