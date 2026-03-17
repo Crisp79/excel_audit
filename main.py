@@ -3,7 +3,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from color import format_and_split_audit_excel as fae
+from color import format_and_split_dataframe as fsd
 from edit import clean_transaction_data as ctd
 
 with open("input.json", "r") as file:
@@ -84,11 +84,9 @@ final_df_b = final_df_b.sort_values(by="SERIAL")
 final_df_a = final_df_a.drop(columns="SERIAL")
 final_df_b = final_df_b.drop(columns="SERIAL")
 
+fsd(final_df_a, "output/output_a1.xlsx")
+fsd(final_df_b, "output/output_b1.xlsx")
+
 merged_df.to_excel("output/output_outer.xlsx")
 final_df_a.to_excel("output/output_a.xlsx")
 final_df_b.to_excel("output/output_b.xlsx")
-
-# Run the formatting function
-fae("output/output_outer.xlsx")
-fae("output/output_a.xlsx")
-fae("output/output_b.xlsx")
