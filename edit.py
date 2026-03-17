@@ -8,6 +8,7 @@ def clean_transaction_data(file_path, header_row_index, anchor_column):
     cleaned_sheets = []
 
     for name, df in all_sheets.items():
+        df["sheet"] = name
         cleaned_sheets.append(df)
 
     # Combine them all into one big DataFrame

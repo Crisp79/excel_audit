@@ -3,7 +3,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from color import format_audit_excel as fae
+from color import format_and_split_audit_excel as fae
 from edit import clean_transaction_data as ctd
 
 with open("input.json", "r") as file:
@@ -78,11 +78,11 @@ final_df_b = final_df_b.drop(
 final_df_a.columns = final_df_a.columns.str.removesuffix("_A")
 final_df_b.columns = final_df_b.columns.str.removesuffix("_B")
 
-final_df_a = final_df_a.sort_values(by='SERIAL')
-final_df_b = final_df_b.sort_values(by='SERIAL')
+final_df_a = final_df_a.sort_values(by="SERIAL")
+final_df_b = final_df_b.sort_values(by="SERIAL")
 
-final_df_a = final_df_a.drop(columns = 'SERIAL')
-final_df_b = final_df_b.drop(columns = 'SERIAL')
+final_df_a = final_df_a.drop(columns="SERIAL")
+final_df_b = final_df_b.drop(columns="SERIAL")
 
 merged_df.to_excel("output/output_outer.xlsx")
 final_df_a.to_excel("output/output_a.xlsx")
