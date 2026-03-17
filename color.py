@@ -1,58 +1,70 @@
-from openpyxl import load_workbook
+import openpyxl
 from openpyxl.styles import PatternFill
 
 
 def format_audit_excel(filename):
-    wb = load_workbook(filename)
+    wb = openpyxl.load_workbook(filename)
     ws = wb.active
 
-    # 1. Define colors
-    # Standard Red for mismatches/missing
-    red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
-    # Yellow for rows that match but have a value difference
-    yellow_fill = PatternFill(
-        start_color="FFFF00", end_color="FFFF00", fill_type="solid"
-    )
+    # Define the colors
+    green = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+    yellow = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
+    red = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
 
-    # 2. Find column indices dynamically
-    merge_col = None
-    var_col = None
+    # Map headers to column indices
+    headers = {str(cell.value).strip(): cell.column for cell in ws[1] if cell.value}
 
-    for col in range(1, ws.max_column + 1):
-        header = ws.cell(row=1, column=col).value
-        if header == "_merge":
-            merge_col = col
-        elif header == "VARIATION":
-            var_col = col
+    # Helper function to find columns with flexible naming
+    def find_col(possible_names):
+        for name in possible_names:
+            if name in headers:
+                return headers[name]
+        return None
 
-    # 3. Apply Conditional Formatting Logic
-    if merge_col:
-        for row_idx in range(2, ws.max_row + 1):
-            merge_status = ws.cell(row=row_idx, column=merge_col).value
+    # Identify indices (Supports standard names and merge suffixes)
+    m_idx = find_col(["_merge"])
+    v_idx = find_col(["VARIATION"])
 
-            # Initialize fill as None (Default/No color)
-            fill_to_apply = None
+    # Left-side columns (a)
+    d_a_idx = find_col(["DEBIT_a", "DEBIT"])
 
-            # Logic A: If it's only in one sheet, mark Red
-            if merge_status in ["left_only", "right_only"]:
-                fill_to_apply = red_fill
+    # Right-side columns (b)
+    c_b_idx = find_col(["CREDIT_b", "CREDIT"])
 
-            # Logic B: If it's in both, check the variation
-            elif merge_status == "both" and var_col:
-                variation_val = ws.cell(row=row_idx, column=var_col).value
-                # Check if variation is not zero (handling None/NaN as well)
-                if variation_val is not None and variation_val != 0:
-                    fill_to_apply = yellow_fill
-                else:
-                    # Match with 0 variation -> stays default color
-                    fill_to_apply = None
+    for row in ws.iter_rows(min_row=2):
+        # Extract values (using 0 if column is missing to avoid errors)
+        m_val = row[m_idx - 1].value if m_idx else None
+        variation = row[v_idx - 1].value if v_idx else 0
 
-            # 4. Apply the fill to the row
-            if fill_to_apply:
-                for col_idx in range(1, ws.max_column + 1):
-                    ws.cell(row=row_idx, column=col_idx).fill = fill_to_apply
+        debit_a = row[d_a_idx - 1].value if d_a_idx else 0
+        credit_b = row[c_b_idx - 1].value if c_b_idx else 0
 
-    # 5. Settings and Save
+        row_fill = None
+
+        # Logic based on merge indicators
+        if m_val == "both":
+            if variation == 0:
+                row_fill = green
+            else:
+                row_fill = yellow
+
+        elif m_val == "left_only":
+            # Check both debit and credit for the left side
+            if debit_a and debit_a != 0:
+                row_fill = red
+
+        elif m_val == "right_only":
+            # Check both debit and credit for the right side
+            if credit_b and credit_b != 0:
+                row_fill = red
+
+        # Apply the color to the row
+        if row_fill:
+            for cell in row:
+                cell.fill = row_fill
+
+    # Save to a new file to preserve the original
     ws.freeze_panes = "A2"
+    ws.delete_cols(m_idx)
     wb.save(filename)
     print(f"File successfully formatted and saved as {filename}")
