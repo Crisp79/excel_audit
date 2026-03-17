@@ -54,10 +54,10 @@ merged_df = pd.merge(
 print(merged_df.info())
 
 merged_df["VARIATION"] = (
-    merged_df["DEBIT_A"]
-    + merged_df["DEBIT_B"]
-    - merged_df["CREDIT_A"]
-    - merged_df["CREDIT_B"]
+    merged_df["DEBIT_A"].abs()
+    + merged_df["DEBIT_B"].abs()
+    - merged_df["CREDIT_A"].abs()
+    - merged_df["CREDIT_B"].abs()
 ).round(2)
 final_df_a = merged_df[merged_df["_merge"].isin(["left_only", "both"])]
 final_df_b = merged_df[merged_df["_merge"].isin(["right_only", "both"])]
