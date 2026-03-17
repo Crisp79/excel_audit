@@ -58,8 +58,7 @@ merged_df["VARIATION"] = (
     + merged_df["DEBIT_B"]
     - merged_df["CREDIT_A"]
     - merged_df["CREDIT_B"]
-)
-
+).round(2)
 final_df_a = merged_df[merged_df["_merge"].isin(["left_only", "both"])]
 final_df_b = merged_df[merged_df["_merge"].isin(["right_only", "both"])]
 
@@ -69,6 +68,9 @@ final_df_a = final_df_a.drop(
 final_df_b = final_df_b.drop(
     columns=[col for col in final_df_b.columns if col.endswith("_A")]
 )
+
+final_df_a.columns = final_df_a.columns.str.removesuffix("_A")
+final_df_b.columns = final_df_b.columns.str.removesuffix("_B")
 
 merged_df.to_excel("output/output_outer.xlsx")
 final_df_a.to_excel("output/output_a.xlsx")
