@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pandas as pd
 
 from color import format_audit_excel as fae
@@ -23,6 +24,9 @@ clean_df_b = ctd(
     file_path=filepath2, header_row_index=head_row2 - 1, anchor_column=key_2
 )
 
+clean_df_a["SERIAL"] = np.arange(1, len(clean_df_a) + 1)
+clean_df_b["SERIAL"] = np.arange(1, len(clean_df_b) + 1)
+
 key_1 = key_1.strip().upper().replace(" ", "_")
 key_2 = key_2.strip().upper().replace(" ", "_")
 
@@ -40,7 +44,9 @@ key_1 = key_1 + "_A"
 key_2 = key_2 + "_B"
 
 print(clean_df_a.info())
+print(clean_df_a.head())
 print(clean_df_b.info())
+print(clean_df_b.head())
 
 
 merged_df = pd.merge(
@@ -71,6 +77,12 @@ final_df_b = final_df_b.drop(
 
 final_df_a.columns = final_df_a.columns.str.removesuffix("_A")
 final_df_b.columns = final_df_b.columns.str.removesuffix("_B")
+
+final_df_a = final_df_a.sort_values(by='SERIAL')
+final_df_b = final_df_b.sort_values(by='SERIAL')
+
+final_df_a = final_df_a.drop(columns = 'SERIAL')
+final_df_b = final_df_b.drop(columns = 'SERIAL')
 
 merged_df.to_excel("output/output_outer.xlsx")
 final_df_a.to_excel("output/output_a.xlsx")
