@@ -6,7 +6,7 @@ import openpyxl
 from openpyxl.styles import PatternFill
 
 
-def format_and_split_dataframe(file_path, df,output_f):
+def format_and_split_dataframe(file_path, df, output_f):
     wb = openpyxl.load_workbook(file_path)
 
     green = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")

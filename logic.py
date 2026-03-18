@@ -4,8 +4,8 @@
 
 import pandas as pd
 
-from color import format_and_split_dataframe as fsd
-from edit import clean_transaction_data as ctd
+from formatter import format_and_split_dataframe as fsd
+from utils import clean_transaction_data as ctd
 
 
 def audit_excel(filepath1, head_row1, key_1, filepath2, head_row2, key_2, out_put):
