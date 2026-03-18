@@ -33,13 +33,14 @@ class MainWindow(QMainWindow):
 
         # 2. Instructions Section
         instructions = QLabel(
-            "### 📋 Usage Instructions\n"
+            "### Usage Instructions\n"
             "1. **File Selection:** Ensure both input files are selected and accessible.\n"
             "2. **Data Consistency:** All sheets within the files must share the **same header row** and index.\n"
-            "3. **Header Formatting:** Headers must have exact spaces and dots (e.g., 'Serial. No' vs 'Serial No'). Case sensitivity is ignored.\n"
+            "3. **Header Formatting:** Headers for **Reference column** must have exact spaces and dots (e.g., 'Serial. No' vs 'Serial No'). Case sensitivity is ignored.\n"
             "4. **File Access:** Close the files in Excel/LibreOffice before clicking execute to avoid 'Permission Denied' errors.\n"
             "5. **Value Constraints:** Ensure integer values are within the allowed range to prevent calculation overflows.\n"
-            "6. **Output:** Choose an output path where you have write permissions.\n\n"
+            "6. **Output:** Choose an output path where you have write permissions.\n"
+            "7. **Amount** : Make sure that **Credit** and **Debit** Columns have no special characters (e.g., '.' or '*')\n\n"
             "**Click 'Execute Logic' to begin the process.**"
         )
         instructions.setTextFormat(Qt.MarkdownText)

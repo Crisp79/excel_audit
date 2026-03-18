@@ -62,9 +62,9 @@ def audit_excel(filepath1, head_row1, key_1, filepath2, head_row2, key_2, out_pu
 
     final_df_a.columns = final_df_a.columns.str.removesuffix("_A")
     final_df_b.columns = final_df_b.columns.str.removesuffix("_B")
-    output_a1 = out_put.removesuffix(".xlsx")  + "_a.xlsx"
-    output_b1 = out_put.removesuffix(".xlsx")  + "_b.xlsx"
-    output_outer = out_put.removesuffix(".xlsx")  + "_outer.xlsx"
+    output_a1 = out_put.removesuffix(".xlsx") + "_buyer.xlsx"
+    output_b1 = out_put.removesuffix(".xlsx") + "_seller.xlsx"
+    output_outer = out_put.removesuffix(".xlsx") + "_outer.xlsx"
     fsd(filepath1, final_df_a, output_a1)
     fsd(filepath2, final_df_b, output_b1)
 
