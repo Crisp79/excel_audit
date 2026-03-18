@@ -1,5 +1,5 @@
 [project]
-name = "audit"
+name = "excel-audit"
 version = "0.1.0"
 authors = [
     { name = "Akshith Vuppala", email = "akhirangoli@gmail.com" }
