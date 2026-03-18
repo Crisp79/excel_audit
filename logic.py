@@ -1,3 +1,7 @@
+# Copyright (c) 2026 Akshith Vuppala
+# Licensed under the MIT License.
+# See LICENSE file in the project root for full license information.
+
 import pandas as pd
 
 from color import format_and_split_dataframe as fsd

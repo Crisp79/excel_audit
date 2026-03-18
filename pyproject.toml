@@ -1,7 +1,10 @@
 [project]
 name = "audit"
 version = "0.1.0"
-description = "Add your description here"
+authors = [
+    { name = "Akshith Vuppala", email = "akhirangoli@gmail.com" }
+]
+license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

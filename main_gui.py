@@ -1,3 +1,8 @@
+# Copyright (c) 2026 Akshith Vuppala
+# Licensed under the MIT License.
+# See LICENSE file in the project root for full license information.
+
+import os
 import sys
 
 from PySide6.QtCore import Qt
@@ -17,6 +22,8 @@ from PySide6.QtWidgets import (
 # Import your logic from the other file
 # from logic import run_calculation
 from main import audit_excel
+
+os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 
 
 class MainWindow(QMainWindow):
