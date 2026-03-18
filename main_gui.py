@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QVBoxLayout,
     QWidget,
@@ -115,19 +116,51 @@ class MainWindow(QMainWindow):
             self.out_path.setText(fname)
 
     def run_logic(self):
-        # Extract data to send to backend
-        data = {
-            "filepath1": self.path1_edit.text(),
-            "filepath2": self.path2_edit.text(),
-            "head_row1": int(self.int1.text()),
-            "head_row2": int(self.int2.text()),
-            "key_1": self.str1.text(),
-            "key_2": self.str2.text(),
-            "out_put": self.out_path.text(),
-        }
-        print(f"Sending to backend: {data}")
-        # Here you would call: result = logic.process(data)
-        audit_excel(**data)
+        # 1. Gather data from your UI
+        p1 = self.path1_edit.text()
+        p2 = self.path2_edit.text()
+
+        # 2. Pre-validation (Instruction check)
+        if not p1 or not p2:
+            # Simple alert if files are missing
+            QMessageBox.warning(
+                self, "Input Error", "Make sure both files are provided!"
+            )
+            return
+
+        try:
+            # 3. Call your backend logic (from logic.py)
+            # We pass the data using the dictionary unpacking we discussed
+            data = {
+                "filepath1": p1,
+                "filepath2": p2,
+                "head_row1": int(self.int1.text()),
+                "head_row2": int(self.int2.text()),
+                "key_1": self.str1.text(),
+                "key_2": self.str2.text(),
+                "out_put": self.out_path.text(),
+            }
+
+            audit_excel(**data)
+
+            # If successful:
+            QMessageBox.information(self, "Success", "Processing complete!")
+
+        except Exception as e:
+            # --- OPTION 3: THE DETAILED LOG BOX ---
+            # This triggers if the backend crashes or has a data error
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Data Format Error")
+            msg.setText("The backend could not process the files.")
+            msg.setInformativeText(
+                "Check if your headers have correct spaces and dots."
+            )
+
+            # This puts the actual Python error/console log into a hidden "Show Details" section
+            msg.setDetailedText(f"Console Log / Traceback:\n{str(e)}")
+
+            msg.exec()
 
 
 if __name__ == "__main__":
