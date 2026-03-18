@@ -2,58 +2,66 @@ name: Excel Audit Build Binaries
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Version Tag (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
 
 jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
         with:
-          version: "latest"
           enable-cache: true
-
-      - name: Install Python
-        run: uv python install
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Build EXE with PyInstaller
-        run: uv run pyinstaller --noconsole --onefile --name "ExcelAudit_Windows" app.py
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - run: uv python install
+      - run: uv sync
+      - run: uv run pyinstaller --noconsole --onefile --name "ExcelAudit_Windows" app.py
+      - uses: actions/upload-artifact@v4
         with:
-          name: ExcelAudit-Windows-Binary
+          name: windows-bin
           path: dist/ExcelAudit_Windows.exe
 
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
         with:
-          version: "latest"
           enable-cache: true
-
-      - name: Install Python
-        run: uv python install
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Build Linux Binary
-        run: uv run pyinstaller --noconsole --onefile --name "ExcelAudit_Linux" app.py
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - run: uv python install
+      - run: uv sync
+      - run: uv run pyinstaller --noconsole --onefile --name "ExcelAudit_Linux" app.py
+      - uses: actions/upload-artifact@v4
         with:
-          name: ExcelAudit-Linux-Binary
+          name: linux-bin
           path: dist/ExcelAudit_Linux
+
+  create-release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-bin
+
+      - name: Download Linux Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-bin
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag_name }}
+          name: Release ${{ github.event.inputs.tag_name }}
+          draft: false
+          prerelease: false
+          files: |
+            ExcelAudit_Windows.exe
+            ExcelAudit_Linux
