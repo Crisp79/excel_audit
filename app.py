@@ -25,6 +25,11 @@ from logic import audit_excel
 
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 
+if getattr(sys, "frozen", False):
+    log_path = os.path.join(os.path.dirname(sys.executable), "error_log.txt")
+    sys.stderr = open(log_path, "w")
+    sys.stdout = sys.stderr
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
