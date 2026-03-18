@@ -6,8 +6,8 @@
 
 If you just want to use the tool without setting up Python, download the standalone executable for your operating system:
 
-  * **Windows (.exe):** [Download Latest Windows Binary](https://www.google.com/search?q=https://github.com/Crisp79/excel-audit/releases/latest)
-  * **Linux (Binary):** [Download Latest Linux Binary](https://www.google.com/search?q=https://github.com/Crisp79/excel-audit/releases/latest)
+  * **Windows (.exe):** [Download Latest Windows Binary](https://github.com/Crisp79/excel_audit/releases/download/v1.0.0/ExcelAudit_Windows.exe)
+  * **Linux (Binary):** [Download Latest Linux Binary](https://github.com/Crisp79/excel_audit/releases/download/v1.0.0/ExcelAudit_Linux)
 
 > **Note:** On Windows, if you get a "SmartScreen" warning, click "More info" and "Run anyway." This is common for unsigned community-built binaries.
 
