@@ -25,7 +25,7 @@ Ensure you have [uv](https://github.com/astral-sh/uv) installed on your system.
 
 ```powershell
 # Clone the repository
-git clone https://github.com/yourusername/excel-audit.git
+git clone https://github.com/Crisp79/excel-audit.git
 cd excel-audit
 
 # Create environment and install dependencies
